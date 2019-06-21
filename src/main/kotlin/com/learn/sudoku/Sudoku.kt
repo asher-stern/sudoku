@@ -9,34 +9,20 @@ fun main(args: Array<String>)
 {
     val board = Sudoku.read(args[0])
     println(Sudoku.print(board))
-    println(Sudoku.solve(board))
-
+    if(!Sudoku.solve(board)) println("Unsolvable.")
 }
 
 
 object Sudoku
 {
-    fun read(filename: String): Board
-    {
-        val board = Array<Array<Int?>>(9) { Array(9) { null } }
-        var rowIndex = 0
-        File(filename).forEachLine { line ->
-            for ( (columnIndex, digitCH) in line.toCharArray().withIndex())
-            {
-                if (digitCH.isDigit())
-                {
-                    board[rowIndex][columnIndex] = digitCH.toString().toInt()
-                }
+    fun read(filename: String): Board =
+            File(filename).useLines { lines ->
+                lines.take(9).map { line -> line.map { if (it.isDigit()) it.toString().toInt() else null }.toTypedArray() }
+                        .toList().toTypedArray()
             }
-            ++rowIndex
-        }
-        return board
-    }
 
-    fun print(board: Board): String
-    {
-        return board.map { row -> row.map { it?.toString() ?: " " }.joinToString("") }.joinToString("\n")
-    }
+    fun print(board: Board): String =
+            board.map { row -> row.map { it?.toString() ?: " " }.joinToString("") }.joinToString("\n")
 
     fun solve(board: Board): Boolean = solve(board, 0, 0)
 
@@ -99,36 +85,11 @@ object Sudoku
                 violatesSquare(value, row, column, board)
     }
 
-    private fun violatesRow(value: Int, row: Int, column: Int, board: Board): Boolean
-    {
-        val boardRow = board[row]
-        for (i in 0 until 9)
-        {
-            if (i != column)
-            {
-                if (boardRow[i] == value)
-                {
-                    return true
-                }
-            }
-        }
-        return false
-    }
+    private fun violatesRow(value: Int, row: Int, column: Int, board: Board): Boolean =
+            (0 until 9).any { (it != column) && (board[row][it] == value) }
 
-    private fun violatesColumn(value: Int, row: Int, column: Int, board: Board): Boolean
-    {
-        for (i in 0 until 9)
-        {
-            if (i != row)
-            {
-                if (board[i][column] == value)
-                {
-                    return true
-                }
-            }
-        }
-        return false
-    }
+    private fun violatesColumn(value: Int, row: Int, column: Int, board: Board): Boolean =
+            (0 until 9).any { (it != row) && (board[it][column] == value) }
 
     private fun violatesSquare(value: Int, row: Int, column: Int, board: Board): Boolean
     {
