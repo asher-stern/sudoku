@@ -9,6 +9,7 @@ fun main(args: Array<String>)
 {
     val board = Sudoku.read(args[0])
     println(Sudoku.print(board))
+    println((1..11).joinToString("") { "=" } )
     if(!Sudoku.solve(board)) println("Unsolvable.")
 }
 
@@ -22,7 +23,12 @@ object Sudoku
             }
 
     fun print(board: Board): String =
-            board.map { row -> row.map { it?.toString() ?: " " }.joinToString("") }.joinToString("\n")
+        board.withIndex().joinToString("\n") { (i, r) ->
+            val columnString = r.withIndex().joinToString("") { (ci, c) ->
+                (if ((ci>0)&&(0==(ci%3))) "|" else "") + (c?.toString()?:" ")
+            }
+            (if ((i>0)&&(0==(i%3))) (1..11).joinToString("", postfix = "\n") { "-" } else "") + columnString
+        }
 
     fun solve(board: Board): Boolean = solve(board, 0, 0)
 
